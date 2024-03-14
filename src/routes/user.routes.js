@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, registerUser, logoutUser } from "../controllers/user.controller.js";
+import { loginUser, registerUser, logoutUser, refreshAccessToken } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 // For File upload
@@ -26,5 +26,8 @@ userRouter.route("/login").post(loginUser)
 
 // secured routes
 userRouter.route("/logout").post(verifyJWT, logoutUser)
+
+// let user refresh token
+userRouter.route("/refresh-token").post(refreshAccessToken)
 
 export { userRouter }; 
