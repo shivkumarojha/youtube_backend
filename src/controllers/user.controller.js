@@ -180,38 +180,72 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET
     )
-  
+
     const user = await User.findById(decodedToken._id)
-  
+
     if (!user) {
       throw new ApiError(401, "Invalid Refresh token")
     }
-  
-    if(incomingRefreshToken !== user?.refreshToken) {
+
+    if (incomingRefreshToken !== user?.refreshToken) {
       throw new ApiError(401, "Refresh token is expired or used")
     }
-  
+
     const options = {
       httpOnly: true,
-      secure: true
+      secure: true,
     }
-    const {refreshToken, accessToken } = await generateAccessAndRefreshTokens(user._id)
-    
+    const { refreshToken, accessToken } = await generateAccessAndRefreshTokens(
+      user._id
+    )
+
     return res
       .status(200)
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
       .json(
-        new ApiResponse(200, 
+        new ApiResponse(
+          200,
           {
-            accessToken, refreshToken
+            accessToken,
+            refreshToken,
           },
           "Access Token refreshed"
-          )
+        )
       )
   } catch (error) {
     throw new ApiError(401, error?.message || "Invalid refresh Token")
   }
 })
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken }
+// Change user Password
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body
+  const userId = req.user?.id
+  const user = await User.findById(userId)
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Old password is not correct")
+  }
+  user.passowrd = newPassword
+  await user.save({ validateBeforeSave: false })
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password Change Successfully"))
+})
+
+// get current user
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "Current User fetched Successfully"))
+})
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changeCurrentPassword,
+  getCurrentUser,
+}

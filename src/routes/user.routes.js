@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { loginUser, registerUser, logoutUser, refreshAccessToken } from "../controllers/user.controller.js";
+import {
+  loginUser,
+  registerUser,
+  logoutUser,
+  refreshAccessToken,
+  changeCurrentPassword
+} from "../controllers/user.controller.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 // For File upload
@@ -30,4 +36,6 @@ userRouter.route("/logout").post(verifyJWT, logoutUser)
 // let user refresh token
 userRouter.route("/refresh-token").post(refreshAccessToken)
 
+// change user Password
+userRouter.route("/change-password").post(verifyJWT, changeCurrentPassword)
 export { userRouter }; 
